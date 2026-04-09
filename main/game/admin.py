@@ -6,7 +6,8 @@ from .models import GameQuestion, Answer, UserProgress
 class AnswerInlineAdmin(admin.TabularInline):
     model = Answer
     extra = 3
-    fields = ['text', 'next_question', 'image', 'order', 'emotion_change', 'time_change']
+    fields = ['text', 'next_question', 'image', 'order',
+              'emotion_change', 'time_change']
     ordering = ['order']
     fk_name = 'question'
 
