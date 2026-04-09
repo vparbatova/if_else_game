@@ -1,4 +1,3 @@
-<!-- game/templates/game/game_complete.html -->
 {% extends 'game/base.html' %}
 {% load static %}
 
@@ -12,7 +11,7 @@
         </div>
     {% endif %}
     
-    <p class="final-message">{{ final_message }}</p>
+    <p class="final-message">{{ message }}</p>
     
     <form action="{% url 'reset_game' %}" method="post">
         {% csrf_token %}
