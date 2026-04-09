@@ -1,0 +1,318 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="result-container">
+    
+    <!-- Заголовок -->
+    <h1 class="result-title">🏁 Игра завершена! 🏁</h1>
+    
+    <!-- Итоговые счётчики -->
+    <div class="final-scores">
+        <h3>Ваши итоговые показатели:</h3>
+        
+        <div class="score-item emotion">
+            <div class="score-header">
+                <span class="score-icon">😊</span>
+                <span class="score-name">Эмоциональное состояние</span>
+                <span class="score-number">{{ emotion_score }}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill emotion-fill" style="width: {{ emotion_score }}%"></div>
+            </div>
+            <div class="score-description">
+                {% if emotion_score >= 70 %}
+                    🌟 Вы в отличном настроении!
+                {% elif emotion_score >= 40 %}
+                    🙂 У вас нормальное состояние
+                {% else %}
+                    😔 Вам было тяжело
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="score-item time">
+            <div class="score-header">
+                <span class="score-icon">⏰</span>
+                <span class="score-name">Время</span>
+                <span class="score-number">{{ time_score }}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill time-fill" style="width: {{ time_score }}%"></div>
+            </div>
+            <div class="score-description">
+                {% if time_score >= 70 %}
+                    ⏳ Времени потрачено достаточно
+                {% elif time_score >= 40 %}
+                    ⌛ Средние затраты времени
+                {% else %}
+                    ⚡ Времени потрачено мало
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Концовка -->
+    <div class="ending-card {{ ending_type }}">
+        {% if ending_image %}
+            <div class="ending-image">
+                <img src="{% static ending_image %}" alt="{{ ending_title }}">
+            </div>
+        {% endif %}
+        
+        <div class="ending-content">
+            <h2 class="ending-title">{{ ending_title }}</h2>
+            <p class="ending-text">{{ ending_text }}</p>
+        </div>
+    </div>
+    
+    <!-- Кнопки действий -->
+    <div class="result-buttons">
+        <form action="{% url 'reset_game' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-restart">
+                🔄 Пройти заново
+            </button>
+        </form>
+        
+        <a href="{% url 'login' %}" class="btn btn-exit">
+            🚪 Выйти из игры
+        </a>
+    </div>
+</div>
+
+<style>
+    .result-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .result-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 28px;
+    }
+    
+    /* Итоговые счётчики */
+    .final-scores {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .final-scores h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #555;
+    }
+    
+    .score-item {
+        margin-bottom: 25px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f7f7f7;
+    }
+    
+    .score-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .score-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .score-icon {
+        font-size: 24px;
+    }
+    
+    .score-name {
+        font-weight: bold;
+        color: #333;
+        flex-grow: 1;
+    }
+    
+    .score-number {
+        font-weight: bold;
+        font-size: 20px;
+        color: #667eea;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 25px;
+        background: #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        transition: width 0.5s ease;
+        border-radius: 12px;
+    }
+    
+    .emotion-fill {
+        background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .time-fill {
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .score-description {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+        text-align: center;
+    }
+    
+    /* Карточка концовки */
+    .ending-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Цвета для разных концовок */
+    .ending-card.happy {
+        border-top: 5px solid #48bb78;
+    }
+    
+    .ending-card.emotional {
+        border-top: 5px solid #ed8936;
+    }
+    
+    .ending-card.long {
+        border-top: 5px solid #4299e1;
+    }
+    
+    .ending-card.bad {
+        border-top: 5px solid #f56565;
+    }
+    
+    .ending-image {
+        width: 100%;
+        max-height: 300px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f0f0f0;
+    }
+    
+    .ending-image img {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        object-fit: cover;
+    }
+    
+    .ending-content {
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .ending-title {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .happy .ending-title {
+        color: #48bb78;
+    }
+    
+    .emotional .ending-title {
+        color: #ed8936;
+    }
+    
+    .long .ending-title {
+        color: #4299e1;
+    }
+    
+    .bad .ending-title {
+        color: #f56565;
+    }
+    
+    .ending-text {
+        font-size: 18px;
+        line-height: 1.6;
+        color: #555;
+    }
+    
+    /* Кнопки */
+    .result-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 14px 30px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .btn-restart {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-exit {
+        background: #cbd5e0;
+        color: #333;
+    }
+    
+    .btn-exit:hover {
+        background: #a0aec0;
+    }
+    
+    /* Адаптация для мобильных */
+    @media (max-width: 600px) {
+        .result-container {
+            padding: 15px;
+        }
+        
+        .ending-title {
+            font-size: 22px;
+        }
+        
+        .ending-text {
+            font-size: 16px;
+        }
+        
+        .score-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}

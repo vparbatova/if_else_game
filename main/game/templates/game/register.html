@@ -1,0 +1,33 @@
+{% extends 'game/base.html' %}
+
+{% block content %}
+<div class="register-form">
+    <h2>Регистрация</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color: red; font-size: 14px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-yes" style="width: 100%;">Зарегистрироваться</button>
+    </form>
+    <p style="text-align: center; margin-top: 20px;">
+        Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a>
+    </p>
+</div>
+
+<style>
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}

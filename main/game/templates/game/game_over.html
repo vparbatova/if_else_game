@@ -1,0 +1,56 @@
+<!-- game/templates/game/game_complete.html -->
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="complete-box">
+    <h2>🎉 Игра завершена! 🎉</h2>
+    
+    {% if image %}
+        <div class="final-image">
+            <img src="{% static image %}" alt="Финал">
+        </div>
+    {% endif %}
+    
+    <p class="final-message">{{ final_message }}</p>
+    
+    <form action="{% url 'reset_game' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="play-again-btn">🔄 Сыграть ещё раз</button>
+    </form>
+</div>
+
+<style>
+    .complete-box {
+        text-align: center;
+    }
+    
+    .final-image {
+        margin: 30px 0;
+    }
+    
+    .final-image img {
+        max-width: 100%;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .final-message {
+        font-size: 20px;
+        margin: 30px 0;
+        padding: 20px;
+        background: #e9f5ff;
+        border-radius: 10px;
+    }
+    
+    .play-again-btn {
+        padding: 12px 40px;
+        font-size: 18px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
