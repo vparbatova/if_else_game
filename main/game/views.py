@@ -41,6 +41,8 @@ def question_view(request):
     if request.method == 'POST':
         answer_id = request.POST.get('answer_id')
         answer = get_object_or_404(Answer, id=answer_id)
+        good_next_question = GameQuestion.objects.filter(text='Хороший ответ')[0]
+        bad_next_question = GameQuestion.objects.filter(text='Плохой ответ')[0]
         if answer.question.text == 'Я так нервничала перед защитой, что совсем не получалось поспать. Может перекусить?' and answer.text == 'Нет':
             return render(request, 'game/game_over.html', context={'message': 'Вы упали в голодный обморок!'})
         if answer.question.text == 'Как будет быстрее добраться до кабинета?' and answer.text == 'По левой лестнице':
@@ -51,12 +53,20 @@ def question_view(request):
             for item in history:
                 if item['question_text'] == 'Какой макияж выбрать?':
                     target_question = item
-                    print('TRUE')
                     break
             if target_question['answer_text'] != 'Не краситься':
-                print('Хороший ответ')
+                answer.next_question = good_next_question
             else:
-                print('Bad answer')
+                answer.next_question = bad_next_question
+        print('\n\n' + str(progress.time_score) + '\n\n')
+        if answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score > 100:
+            return render(request, 'game/game_over.html', context={'message': 'Вы опоздали, вас не пустили в кабинет!'})
+        elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score >= 0 and progress.time_score < 100:
+            next_question = GameQuestion.objects.filter(text='Занятие началось 20 минут назад, надеюсь хоть на пересдачу вы придете вовремя')[0]
+            answer.next_question = next_question
+        elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score <= 0:
+            next_question = GameQuestion.objects.filter(text='Дарова, защищайся')[0]
+            answer.next_question = next_question
         progress.emotion_score = progress.emotion_score + answer.emotion_change
         progress.time_score = progress.time_score + answer.time_change
 
@@ -133,6 +143,8 @@ def game_result(request):
 def reset_game(request):
     progress = request.user.game_progress
     first_question = GameQuestion.objects.filter(is_first=True)[0]
+    progress.time_score = 0
+    progress.emotion_score = 50
     progress.current_question = first_question
     progress.answers_history = []
     progress.save()
