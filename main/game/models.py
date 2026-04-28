@@ -36,6 +36,7 @@ class Answer(models.Model):
     emotion_change = models.IntegerField('Изменение эмоционального состояния',
                                          default=0)
     time_change = models.IntegerField('Изменение времени', default=0)
+    score = models.IntegerField('Изменение баллов за лабу', default=0)
 
     class Meta:
         verbose_name = 'Вариант ответа'
@@ -52,3 +53,4 @@ class UserProgress(models.Model):
     answers_history = models.JSONField(default=list)
     emotion_score = models.IntegerField('Эмоциональное состояние', default=50)
     time_score = models.IntegerField('Время', default=50)
+    score_for_lab = models.IntegerField('Баллы за лабу', default=0)

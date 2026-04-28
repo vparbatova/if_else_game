@@ -51,14 +51,13 @@ def question_view(request):
             history = UserProgress.objects.filter(user=request.user)[0].answers_history
             target_question = None
             for item in history:
-                if item['question_text'] == 'Какой макияж выбрать?':
+                if item['question_text'] == 'Чего-то не хватает, но времени немного. Мне нужно…':
                     target_question = item
                     break
             if target_question['answer_text'] != 'Не краситься':
                 answer.next_question = good_next_question
             else:
                 answer.next_question = bad_next_question
-        print('\n\n' + str(progress.time_score) + '\n\n')
         if answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score > 100:
             return render(request, 'game/game_over.html', context={'message': 'Вы опоздали, вас не пустили в кабинет!'})
         elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score >= 0 and progress.time_score < 100:
@@ -69,6 +68,7 @@ def question_view(request):
             answer.next_question = next_question
         progress.emotion_score = progress.emotion_score + answer.emotion_change
         progress.time_score = progress.time_score + answer.time_change
+        progress.score_for_lab = progress.score_for_lab + answer.score
 
         history = progress.answers_history
         history.append({
@@ -79,6 +79,7 @@ def question_view(request):
             'emotion_change': answer.emotion_change,
             'time_change': answer.time_change,
             'emotion_after': progress.emotion_score,
+            'score_for_lab': progress.score_for_lab,
             'time_after': progress.time_score
         })
         progress.answers_history = history
@@ -96,6 +97,7 @@ def question_view(request):
     return render(request, 'game/question.html', {
         'question': question,
         'answers': answers,
+        'lab_score': progress.score_for_lab,
         'emotion_score': progress.emotion_score,
         'time_score': progress.time_score
     })
@@ -107,6 +109,9 @@ def game_result(request):
 
     emotion = progress.emotion_score
     time_score = progress.time_score
+    score_for_lab = progress.score_for_lab
+
+    lab_passed = score_for_lab >= 50
 
     if emotion >= 70 and time_score >= 70:
         ending_type = 'happy'
@@ -135,7 +140,9 @@ def game_result(request):
         'ending_image': ending_image,
         'ending_type': ending_type,
         'emotion_score': emotion,
-        'time_score': time_score
+        'time_score': time_score,
+        'lab_score': score_for_lab,
+        'lab_passed': lab_passed
     })
 
 
@@ -145,6 +152,7 @@ def reset_game(request):
     first_question = GameQuestion.objects.filter(is_first=True)[0]
     progress.time_score = 0
     progress.emotion_score = 50
+    progress.score_for_lab = 0
     progress.current_question = first_question
     progress.answers_history = []
     progress.save()
