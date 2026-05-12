@@ -3,7 +3,9 @@
 {% load static %}
 
 {% block content %}
-<div class="question-box">
+<div class="question-box" 
+     {% if background_image %}style="--bg-image: url({% static background_image %});"{% endif %}
+     {% if not background_image %}style="--bg-image: none;"{% endif %}>
     
     {% if question.image %}
         <div class="question-image">
@@ -33,7 +35,6 @@
                             <img src="{% static answer.image %}" alt="{{ answer.text }}">
                         </div>
                     {% endif %}
-                    
                 </button>
             {% endfor %}
         </div>
@@ -53,6 +54,37 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        
+        /* Фоновое изображение через CSS-переменную */
+        background-image: var(--bg-image);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        
+        /* Полупрозрачный фон для читаемости текста */
+        position: relative;
+        border-radius: 20px;
+        min-height: 100vh;
+    }
+    
+    /* Оверлей для улучшения читаемости текста на фоне */
+    .question-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 20px;
+        z-index: 0;
+    }
+    
+    /* Контент должен быть поверх оверлея */
+    .question-box > * {
+        position: relative;
+        z-index: 1;
     }
     
     .question-image {
@@ -85,8 +117,8 @@
     
     /* КНОПКИ - УЗКИЕ И ВЫСОКИЕ */
     .answer-btn {
-        width: 250px;  /* Узкие кнопки */
-        min-height: 300px;  /* Высокие кнопки */
+        width: 250px;
+        min-height: 300px;
         padding: 20px 15px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
