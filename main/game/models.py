@@ -51,6 +51,6 @@ class UserProgress(models.Model):
                                          on_delete=models.SET_NULL,
                                          null=True)
     answers_history = models.JSONField(default=list)
-    emotion_score = models.IntegerField('Эмоциональное состояние', default=50)
-    time_score = models.IntegerField('Время', default=50)
+    emotion_score = models.IntegerField('Эмоциональное состояние', default=0)
+    time_score = models.IntegerField('Время', default=0)
     score_for_lab = models.IntegerField('Баллы за лабу', default=0)

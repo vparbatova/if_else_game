@@ -28,8 +28,8 @@ def question_view(request):
         user=request.user,
         defaults={
             'current_question': first_question,
-            'emotion_score': 50,
-            'time_score': 50
+            'emotion_score': 0,
+            'time_score': 0
         }
     )
 
@@ -58,17 +58,18 @@ def question_view(request):
                 answer.next_question = good_next_question
             else:
                 answer.next_question = bad_next_question
-        if answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score > 100:
+        if answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score >= 21:
             return render(request, 'game/game_over.html', context={'message': 'Вы опоздали, вас не пустили в кабинет!'})
-        elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score >= 0 and progress.time_score < 100:
+        elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score >= 10 and progress.time_score <= 20:
             next_question = GameQuestion.objects.filter(text='Занятие началось 20 минут назад, надеюсь хоть на пересдачу вы придете вовремя')[0]
             answer.next_question = next_question
-        elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score <= 0:
+        elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score <= 10:
             next_question = GameQuestion.objects.filter(text='Здравствуйте! Вы как раз вовремя')[0]
             answer.next_question = next_question
         progress.emotion_score = progress.emotion_score + answer.emotion_change
         progress.time_score = progress.time_score + answer.time_change
         progress.score_for_lab = progress.score_for_lab + answer.score
+        print(progress.emotion_score, progress.time_score, progress.score_for_lab)
 
         history = progress.answers_history
         history.append({
@@ -113,35 +114,35 @@ def game_result(request):
 
     lab_passed = score_for_lab >= 6
 
-    if emotion >= 70 and time_score >= 70:
+    if emotion >= 7 and score_for_lab >= 6:
         ending_type = 'happy'
         ending_title = '🎉 Счастливый конец! 🎉'
-        ending_text = 'Вы прекрасно провели время и остались довольны! Ваше эмоциональное состояние на высоте, а время потрачено с пользой!'
-        ending_image = 'game/images/happy_ending.jpg'
-    elif emotion >= 70 and time_score < 30:
+        ending_text = 'Вы прекрасно провели время и сдали лабораторную! Ваше эмоциональное состояние на высоте, а время потрачено с пользой!'
+        ending_image = 'game/images/happy.jpg'
+    elif emotion >= 7 and score_for_lab < 6:
         ending_type = 'emotional'
-        ending_title = '😊 Эмоциональный, но быстрый конец'
-        ending_text = 'Вы получили массу эмоций, но время пролетело незаметно! Возможно, стоило бы чуть больше времени уделить процессу.'
-        ending_image = 'game/images/emotional_ending.jpg'
-    elif emotion < 30 and time_score >= 70:
+        ending_title = '😊 Здоровая менталка ценой лабы'
+        ending_text = 'Вы получили массу эмоций, но время отправились на пересдачу! Возможно, стоило бы чуть больше времени уделить процессу.'
+        ending_image = 'game/images/pohui.jpg'
+    elif emotion < 7 and score_for_lab >= 6:
         ending_type = 'long'
-        ending_title = '⏰ Долгий, но спокойный конец'
-        ending_text = 'Вы потратили много времени, но остались спокойны. Иногда важнее процесс, чем результат!'
-        ending_image = 'game/images/long_ending.jpg'
+        ending_title = '⏰ Лабу вы сдали, но какой ценой'
+        ending_text = 'Ценой всего... Вам нужно 5 сеансов с психотерапевтом.'
+        ending_image = 'game/images/tanos.jpg'
     else:
         ending_type = 'bad'
-        ending_title = '😔 Грустный конец'
-        ending_text = 'К сожалению, вы не получили удовольствия и потратили время впустую. В следующий раз стоит выбирать иначе!'
-        ending_image = 'game/images/bad_ending.jpg'
+        ending_title = '😔 О неееееет, мой доооом'
+        ending_text = 'Всё пропало... Ваше ментальное состояние на 0, а вам еще на пересдачу. В следующий раз стоит выбирать иначе!'
+        ending_image = 'game/images/vsyopropalo.png'
 
     return render(request, 'game/game_result.html', {
         'ending_title': ending_title,
         'ending_text': ending_text,
         'ending_image': ending_image,
         'ending_type': ending_type,
-        'emotion_score': emotion,
+        'emotion_score': emotion*10,
         'time_score': time_score,
-        'lab_score': score_for_lab,
+        'lab_score': score_for_lab*10,
         'lab_passed': lab_passed
     })
 
@@ -151,7 +152,7 @@ def reset_game(request):
     progress = request.user.game_progress
     first_question = GameQuestion.objects.filter(is_first=True)[0]
     progress.time_score = 0
-    progress.emotion_score = 50
+    progress.emotion_score = 0
     progress.score_for_lab = 0
     progress.current_question = first_question
     progress.answers_history = []
