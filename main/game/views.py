@@ -41,8 +41,8 @@ def question_view(request):
     if request.method == 'POST':
         answer_id = request.POST.get('answer_id')
         answer = get_object_or_404(Answer, id=answer_id)
-        good_next_question = GameQuestion.objects.filter(text='Хороший ответ')[0]
-        bad_next_question = GameQuestion.objects.filter(text='Плохой ответ')[0]
+        good_next_question = GameQuestion.objects.filter(text='Я тебе сейчас отправлю в телеграмм. А сейчас мне пора идти. Пока-пока!')[0]
+        bad_next_question = GameQuestion.objects.filter(text='Много чего. Готовиться заранее надо.')[0]
         if answer.question.text == 'Я так нервничала перед защитой, что совсем не получалось поспать. Может перекусить?' and answer.text == 'Нет':
             return render(request, 'game/game_over.html', context={'message': 'Вы упали в голодный обморок!'})
         if answer.question.text == 'Как будет быстрее добраться до кабинета?' and answer.text == 'По левой лестнице':
@@ -64,7 +64,7 @@ def question_view(request):
             next_question = GameQuestion.objects.filter(text='Занятие началось 20 минут назад, надеюсь хоть на пересдачу вы придете вовремя')[0]
             answer.next_question = next_question
         elif answer.question.text == 'Пора идти в кабинет' and answer.text == 'Далее' and progress.time_score <= 0:
-            next_question = GameQuestion.objects.filter(text='Дарова, защищайся')[0]
+            next_question = GameQuestion.objects.filter(text='Здравствуйте! Вы как раз вовремя')[0]
             answer.next_question = next_question
         progress.emotion_score = progress.emotion_score + answer.emotion_change
         progress.time_score = progress.time_score + answer.time_change
@@ -111,7 +111,7 @@ def game_result(request):
     time_score = progress.time_score
     score_for_lab = progress.score_for_lab
 
-    lab_passed = score_for_lab >= 50
+    lab_passed = score_for_lab >= 6
 
     if emotion >= 70 and time_score >= 70:
         ending_type = 'happy'
